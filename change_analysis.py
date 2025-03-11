@@ -22,9 +22,6 @@ def parse_cell(cell):
 
 
 def normalize_text(text):
-    """
-    Lowercase and collapse extra whitespace.
-    """
     if not isinstance(text, str):
         return ""
     text = text.lower()
@@ -33,9 +30,6 @@ def normalize_text(text):
 
 
 def tokenize(text):
-    """
-    Simple word-level tokenization by word characters plus hyphens.
-    """
     return re.findall(r"\b[\w-]+\b", text)
 
 
@@ -61,13 +55,11 @@ def extract_text_patterns(
     df = pd.read_csv(csv_file, header=0, sep=",", dtype=str).fillna("")
     total_extensions = len(df)
 
-    # Store extension-level presence for tokens and raw values for each column.
     patterns = defaultdict(lambda: {
         "token_counts": Counter(),
         "raw_values": Counter()
     })
 
-    # Process each row (each extension)
     for _, row in df.iterrows():
         for col in columns_to_parse:
             cell_value = row.get(col, "")
@@ -75,7 +67,6 @@ def extract_text_patterns(
             if not isinstance(parsed_dict, dict):
                 continue
 
-            # Build sets to count each token and raw value only once per extension.
             tokens_set = set()
             raw_set = set()
 
@@ -85,11 +76,9 @@ def extract_text_patterns(
                     raw_set.add(val_str)
                     tokens_set.update(tokenize(val_str))
 
-            # Update counters for this column with the set of tokens/raw values for this extension.
             patterns[col]["token_counts"].update(tokens_set)
             patterns[col]["raw_values"].update(raw_set)
 
-    # Build the summary with ratios relative to the total number of extensions.
     summary = {}
     for col, data in patterns.items():
         token_counts = data["token_counts"]
@@ -128,23 +117,20 @@ def extract_text_patterns(
 
 
 def main():
-    # Example usage: process two CSV files (malicious and general)
     columns_to_parse = ["added_details", "removed_details", "modified_details_v2", "modified_details_v3"]
 
-    # 1) Malicious dataset
     extract_text_patterns(
         csv_file="manifest_differences_malicious.csv",
         columns_to_parse=columns_to_parse,
         output_json="malicious_summary.json",
-        ratio_threshold=0.01
+        ratio_threshold=0.05
     )
 
-    # 2) General dataset
     extract_text_patterns(
         csv_file="manifest_differences_general.csv",
         columns_to_parse=columns_to_parse,
         output_json="general_summary.json",
-        ratio_threshold=0.01
+        ratio_threshold=0.05
     )
 
 

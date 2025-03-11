@@ -1,76 +1,68 @@
 #!/usr/bin/env python3
 import json
 
+def load_summary(json_file):
+    with open(json_file, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-def compare_summaries(malicious_json, general_json, output_json="comparison.json"):
+def compare_patterns(general_summary, malicious_summary, field="token_counts"):
     """
-    Compare two summaries (malicious vs. general).  For each column:
-      - For each token in either summary
-      - Show absolute count difference, ratio difference, etc.
+    For each column and each token (or raw value) in that field,
+    compute:
+       - gen_ratio: ratio in the general dataset (or 0 if not present)
+       - mal_ratio: ratio in the malicious dataset (or 0 if not present)
+       - abs_diff: absolute difference (|mal_ratio - gen_ratio|)
+       - relative_diff: abs_diff divided by the larger ratio (or 0 if both are zero)
+    Returns a dict with these details.
     """
-    comparison = {}
+    diff_summary = {}
+    # Iterate over columns present in either summary
+    all_columns = set(general_summary.keys()).union(set(malicious_summary.keys()))
+    for col in all_columns:
+        gen_patterns = general_summary.get(col, {}).get(field, {})
+        mal_patterns = malicious_summary.get(col, {}).get(field, {})
 
-    # The JSON structure is: summary[col] = {
-    #     "total_tokens": int,
-    #     "token_counts": { "some_token": {"count": X, "ratio": Y}, ... },
-    #     "total_raw_values": int,
-    #     "raw_values": { ... }
-    # }
-    columns = set(malicious_json.keys()) | set(general_json.keys())
+        # Get union of all keys in this column (tokens or raw values)
+        all_keys = set(gen_patterns.keys()).union(set(mal_patterns.keys()))
+        col_diff = {}
+        for key in all_keys:
+            gen_ratio = gen_patterns.get(key, {}).get("ratio", 0.0)
+            mal_ratio = mal_patterns.get(key, {}).get("ratio", 0.0)
+            abs_diff = abs(mal_ratio - gen_ratio)
+            # Calculate relative difference (avoiding division by zero)
+            if max(mal_ratio, gen_ratio) > 0:
+                relative_diff = abs_diff / max(mal_ratio, gen_ratio)
+            else:
+                relative_diff = 0.0
 
-    for col in columns:
-        col_mal = malicious_json.get(col, {})
-        col_gen = general_json.get(col, {})
-
-        mal_tokens = col_mal.get("token_counts", {})
-        gen_tokens = col_gen.get("token_counts", {})
-
-        # We'll combine the keys from both sets of tokens
-        all_tokens = set(mal_tokens.keys()) | set(gen_tokens.keys())
-
-        token_diffs = {}
-        for token in all_tokens:
-            mal_info = mal_tokens.get(token, {"count": 0, "ratio": 0.0})
-            gen_info = gen_tokens.get(token, {"count": 0, "ratio": 0.0})
-
-            mal_count = mal_info["count"]
-            gen_count = gen_info["count"]
-            mal_ratio = mal_info["ratio"]
-            gen_ratio = gen_info["ratio"]
-
-            # Differences
-            diff_count = mal_count - gen_count
-            diff_ratio = mal_ratio - gen_ratio
-
-            token_diffs[token] = {
-                "mal_count": mal_count,
-                "gen_count": gen_count,
-                "diff_count": diff_count,
-                "mal_ratio": round(mal_ratio, 6),
-                "gen_ratio": round(gen_ratio, 6),
-                "diff_ratio": round(diff_ratio, 6)
+            col_diff[key] = {
+                "general_ratio": gen_ratio,
+                "malicious_ratio": mal_ratio,
+                "absolute_diff": abs_diff,
+                "relative_diff": relative_diff
             }
-
-        comparison[col] = {
-            "token_differences": token_diffs
-        }
-
-    # Write out a JSON with the differences
-    with open(output_json, "w", encoding="utf-8") as f:
-        json.dump(comparison, f, indent=2)
-    print(f"Wrote comparison results to {output_json}")
-
+        diff_summary[col] = col_diff
+    return diff_summary
 
 def main():
-    # Load both
-    with open("malicious_summary.json", "r", encoding="utf-8") as f:
-        malicious_data = json.load(f)
-    with open("general_summary.json", "r", encoding="utf-8") as f:
-        general_data = json.load(f)
+    # Load the two summaries
+    general_summary = load_summary("general_summary.json")
+    malicious_summary = load_summary("malicious_summary.json")
 
-    # Compare
-    compare_summaries(malicious_data, general_data, output_json="comparison_results.json")
+    # Compare token counts (you could similarly compare "raw_values")
+    diff_tokens = compare_patterns(general_summary, malicious_summary, field="token_counts")
+    diff_raw = compare_patterns(general_summary, malicious_summary, field="raw_values")
 
+    # Combine into one result
+    combined_diff = {
+        "token_comparison": diff_tokens,
+        "raw_value_comparison": diff_raw
+    }
+
+    # Save the comparison result to JSON
+    with open("comparison_summary.json", "w", encoding="utf-8") as f:
+        json.dump(combined_diff, f, indent=4)
+    print("Comparison summary written to comparison_summary.json")
 
 if __name__ == "__main__":
     main()
