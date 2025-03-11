@@ -4,7 +4,8 @@ import re
 
 import pandas as pd
 
-data_folder = "/home/tobias/extension-data"
+#change directory depending on own structure
+data_folder = "D:\\extensions\\combined"
 
 extensions_data = []
 listdir = os.listdir(data_folder)
@@ -35,11 +36,11 @@ for extensions_id in listdir:
 
     if not os.path.isdir(extension_path):
         print(f"Extensionpath not found: {extension_path}")
-        break
+        continue
 
     if not os.path.isfile(manifest_path):
         print(f"Manifestpath not found: {manifest_path}")
-        break
+        continue
 
     try:
         manifest, comments = read_json_file(manifest_path)
@@ -51,18 +52,26 @@ for extensions_id in listdir:
                 "Manifest_Version": "empty",
                 "Version": "empty",
                 "Permissions": "empty",
+                "Host Permissions": "empty",
                 "Background Scripts": "empty",
-                "Comments": "empty"
+                "Content Scripts": "empty",
+                "WARs": "empty",
+                "Comments": "empty",
+                "Browser Actions": "empty"
             })
 
         elif isinstance(manifest, dict):
-
+            print(f"Reading {extensions_id}")
             name = manifest.get("name", "Unknown")
             manifest_version = manifest.get("manifest_version", "Unknown")
             version = manifest.get("version", "Unknown")
             description = manifest.get("description", "No description")
             background_script = manifest.get("background", "No background")
+            content_scripts = manifest.get("content_scripts", "No content scripts")
+            wars = manifest.get("web_accessible_resources", "No WARs")
             permissions = manifest.get("permissions", "No Permissions")
+            host_permissions = manifest.get("permissions", "No Host Permissions")
+            browser_actions = manifest.get("browser_action", "No browser actions")
 
             extensions_data.append({
                 "Extension ID": extensions_id,
@@ -71,7 +80,11 @@ for extensions_id in listdir:
                 "Manifest_Version": manifest_version,
                 "Version": version,
                 "Permissions": permissions,
+                "Host Permissions": host_permissions,
                 "Background Scripts": background_script,
+                "Content Scripts": content_scripts,
+                "WARs": wars,
+                "Browser Actions": browser_actions,
                 "Comments": comments
             })
         else:
@@ -82,4 +95,4 @@ for extensions_id in listdir:
 
 df = pd.DataFrame(extensions_data)
 
-df.to_csv("extensions_data.csv", index=False)
+df.to_csv("D:\\extensions\\combined\\extensions_data.csv", index=False)
