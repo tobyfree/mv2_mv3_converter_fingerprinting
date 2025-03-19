@@ -22,6 +22,9 @@ def parse_cell(cell):
 
 
 def normalize_text(text):
+    """
+    Lowercase and collapse extra whitespace.
+    """
     if not isinstance(text, str):
         return ""
     text = text.lower()
@@ -30,6 +33,9 @@ def normalize_text(text):
 
 
 def tokenize(text):
+    """
+    Tokenize text using word characters and hyphens.
+    """
     return re.findall(r"\b[\w-]+\b", text)
 
 
@@ -40,8 +46,9 @@ def extract_text_patterns(
         ratio_threshold=0.01
 ):
     """
-    1) For each row in the CSV, parse the specified columns (which contain dict-like strings)
-       and for each cell, compute the set of unique tokens and raw values.
+    1) For each row in the CSV, parse the specified columns (which contain dict-like strings),
+       flatten each dictionary (mapping keys to values as "key: value") and then compute the
+       set of unique tokens and raw mapping strings.
     2) Count (per column) in how many extensions (rows) a given token/raw value appears.
     3) Compute ratio = (number of extensions containing the token) / (total extensions).
     4) Only include tokens/raw values that appear in at least 'ratio_threshold' of extensions.
@@ -55,6 +62,7 @@ def extract_text_patterns(
     df = pd.read_csv(csv_file, header=0, sep=",", dtype=str).fillna("")
     total_extensions = len(df)
 
+    # We will count unique occurrences per extension.
     patterns = defaultdict(lambda: {
         "token_counts": Counter(),
         "raw_values": Counter()
@@ -70,12 +78,15 @@ def extract_text_patterns(
             tokens_set = set()
             raw_set = set()
 
-            for _, value in parsed_dict.items():
-                val_str = normalize_text(str(value))
-                if val_str:
-                    raw_set.add(val_str)
-                    tokens_set.update(tokenize(val_str))
+            for key, value in parsed_dict.items():
+                # Combine key and value into a single string pattern.
+                pattern = f"{key}: {value}"
+                pattern = normalize_text(pattern)
+                if pattern:
+                    raw_set.add(pattern)
+                    tokens_set.update(tokenize(pattern))
 
+            # Update counts with unique occurrences per extension
             patterns[col]["token_counts"].update(tokens_set)
             patterns[col]["raw_values"].update(raw_set)
 
@@ -110,7 +121,6 @@ def extract_text_patterns(
             "raw_values": raw_details
         }
 
-    # Write the summary to JSON.
     with open(output_json, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=4)
     print(f"Done. Wrote summary to {output_json}")
@@ -123,7 +133,7 @@ def main():
         csv_file="manifest_differences_malicious.csv",
         columns_to_parse=columns_to_parse,
         output_json="malicious_summary.json",
-        ratio_threshold=0.05
+        ratio_threshold=0.05  # only include patterns present in at least 5% of extensions
     )
 
     extract_text_patterns(
