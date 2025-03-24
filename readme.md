@@ -34,7 +34,7 @@ manifest-pipeline/
 ├── pattern_extraction.py     # Step 2: Pattern extraction
 ├── pattern_comparison.py     # Step 3: General vs malicious analysis
 ├── pattern_applyer.py        # Step 4: Extension scoring
-├── pattern_visualisation.py  # Step 5: Report generation
+└── pattern_visualisation.py  # Step 5: Report generation
 ```
 
 ---
