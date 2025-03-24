@@ -9,6 +9,18 @@ A modular, scriptable pipeline to analyze browser extension manifests converter 
 
 It identifies structural changes between versions (V2 ↔ V3), extracts recurring patterns, compares malicious vs general traits, and scores extensions based on pattern weightings.
 
+
+## Quickstart
+
+```bash
+git clone https://github.com/tobyfree/mv2_mv3_converter_fingerprinting.git
+cd manifest-pipeline
+pip install -r requirements.txt
+cp config.yaml config.local.yaml  # optional, if using a template
+python run_pipeline.py --config config.yaml
+```
+
+
 ---
 
 ## Prerequisites
