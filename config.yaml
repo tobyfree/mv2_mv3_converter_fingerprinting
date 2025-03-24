@@ -1,0 +1,16 @@
+paths:
+  v2_general: "data/large-dataset/V2"
+  v2_malicious: "data/malicious-dataset/V2"
+  v3_dir: "data/large-dataset/V3"
+
+outputs:
+  diff_csv_general: "results/manifest_differences_general.csv"
+  diff_csv_malicious: "results/manifest_differences_malicious.csv"
+  summary_general: "results/general_summary.json"
+  summary_malicious: "results/malicious_summary.json"
+  comparison_json: "results/comparison_summary.json"
+  score_output_csv: "results/maliciousness_scores_large_V3.csv"
+  html_report: "results/report.html"
+
+flags:
+  parallel_score: true

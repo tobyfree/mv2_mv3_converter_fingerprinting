@@ -2,37 +2,21 @@
 import os
 import json
 import csv
-import ast
-import re
-from collections import defaultdict, Counter
+import argparse
+from tqdm import tqdm
+from collections import defaultdict
 
-# General Data
-#PARENT_DIR = "D:\\extensions\\large-dataset\\V2"
-#OUTPUT_CSV = "manifest_differences_general.csv"
-
-# Malicious Dataset
-PARENT_DIR = "D:\\extensions\\malicious\\Kapravelos\\V2"
-OUTPUT_CSV = "manifest_differences_malicious.csv"
-
+# ========================
+# Flatten Manifest Helpers
+# ========================
 def flatten_manifest(d, parent_key="", sep="."):
-    """
-    Recursively flattens a manifest dictionary.
-    • Applies key mapping (e.g. "browser_action" -> "action")
-    • For list values, it now produces a list of individual string entries.
-      For example, if a key "key1" has value ["value1", "value2"],
-      the result will have: key1: [ "value1", "value2" ].
-    • All non-dict, non-list values are converted to lowercased strings.
-    """
-    items = {}
-    # Known key mapping for manifest migration.
     key_mapping = {
         "browser_action": "action",
         "page_action": "action",
         "background.scripts": "background.service_worker"
-        # Extend as needed.
     }
+    items = {}
     for k, v in d.items():
-        # Map the key if needed.
         k = key_mapping.get(k, k)
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
         if isinstance(v, dict):
@@ -41,7 +25,6 @@ def flatten_manifest(d, parent_key="", sep="."):
             new_list = []
             for elem in v:
                 if isinstance(elem, dict):
-                    # For dicts in lists, flatten and join the items in sorted order.
                     flat_elem = flatten_manifest(elem)
                     sorted_items = sorted(flat_elem.items())
                     joined = ", ".join([f"{key}: {value}" for key, value in sorted_items])
@@ -54,27 +37,11 @@ def flatten_manifest(d, parent_key="", sep="."):
     return items
 
 def compare_values(v2, v3):
-    """
-    Compare two values from flattened manifests.
-    If both are lists, compare them as sets (order and duplicates are ignored).
-    Otherwise, use simple equality.
-    """
     if isinstance(v2, list) and isinstance(v3, list):
         return set(v2) == set(v3)
-    else:
-        return v2 == v3
+    return v2 == v3
 
 def compare_manifests(manifest_v2, manifest_v3):
-    """
-    Compare two manifest dictionaries and return a dict with differences.
-    Ignores keys like 'manifest_version' and 'version'.
-    Uses the custom flattening (which now produces lists for array values)
-    and the custom comparison.
-    Returns:
-      - 'added': keys present only in V3 with their values.
-      - 'removed': keys present only in V2 with their values.
-      - 'modified': keys present in both but with different values.
-    """
     ignore_keys = {'manifest_version', 'version'}
     flat_v2 = flatten_manifest(manifest_v2)
     flat_v3 = flatten_manifest(manifest_v3)
@@ -96,17 +63,12 @@ def compare_manifests(manifest_v2, manifest_v3):
             diff_result['modified'][key] = {"v2": flat_v2[key], "v3": flat_v3[key]}
     return diff_result
 
+# ========================
+# Core Functionality
+# ========================
 def process_extensions(parent_dir):
-    """
-    Process each extension folder in the main folder.
-    V2 manifest is expected in:
-      <ext_folder>/manifest.json
-    V3 manifest is expected in:
-      <parent_dir>/converted/<ext_name>_mv3/manifest.json
-    Returns a list of dictionaries with diff information.
-    """
     results = []
-    for ext_name in os.listdir(parent_dir):
+    for ext_name in tqdm(os.listdir(parent_dir), desc="Comparing manifests", unit="ext"):
         ext_folder = os.path.join(parent_dir, ext_name)
         if os.path.isdir(ext_folder) and ext_name != "converted":
             manifest_v2_path = os.path.join(ext_folder, "manifest.json")
@@ -159,10 +121,18 @@ def save_to_csv(results, output_csv):
     except Exception as e:
         print(f"Error writing CSV: {e}")
 
-def main():
-    results = process_extensions(PARENT_DIR)
+# ========================
+# Main (argparse enabled)
+# ========================
+def main(args=None):
+    parser = argparse.ArgumentParser(description="Compare V2 and V3 manifest files across extensions.")
+    parser.add_argument("--input_dir", help="Path to the parent directory containing extensions", default="D:\\extensions\\large-dataset\\V2")
+    parser.add_argument("--output_csv", help="Path to output CSV file", default="manifest_differences_general.csv")
+    parsed = parser.parse_args(args)
+
+    results = process_extensions(parsed.input_dir)
     if results:
-        save_to_csv(results, OUTPUT_CSV)
+        save_to_csv(results, parsed.output_csv)
     else:
         print("No valid extensions found or no differences detected.")
 

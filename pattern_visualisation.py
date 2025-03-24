@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 import json
+import argparse
+from tqdm import tqdm
 
-
+# ========================
+# Helper Functions
+# ========================
 def load_comparison(filename):
     with open(filename, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 def generate_html_table(section_data, section_name):
-    """
-    For a given section (token_comparison or raw_value_comparison),
-    generate an HTML string with tables for each column.
-    """
     html_content = f"<h2>{section_name.replace('_', ' ').title()}</h2>\n"
-    for col in sorted(section_data.keys()):
+    for col in tqdm(sorted(section_data.keys()), desc=f"Generating {section_name}", unit="col"):
         html_content += f"<h3>Column: {col}</h3>\n"
-        # Table header
         html_content += """
         <table>
             <thead>
@@ -29,7 +27,6 @@ def generate_html_table(section_data, section_name):
             </thead>
             <tbody>
         """
-        # Sort items: first by relative_diff descending, then absolute_diff descending.
         sorted_items = sorted(
             section_data[col].items(),
             key=lambda kv: (-kv[1].get("relative_diff", 0), -kv[1].get("absolute_diff", 0))
@@ -49,13 +46,11 @@ def generate_html_table(section_data, section_name):
         """
     return html_content
 
-
 def generate_report(json_file, output_html="report.html"):
     data = load_comparison(json_file)
     token_section = data.get("token_comparison", {})
     raw_section = data.get("raw_value_comparison", {})
 
-    # Start the HTML document
     html = """<!DOCTYPE html>
 <html>
 <head>
@@ -75,22 +70,24 @@ def generate_report(json_file, output_html="report.html"):
     <p>This report compares the patterns found in the general dataset with those in the malicious dataset. The tables show, per column, the ratio in the general dataset, the ratio in the malicious dataset, their absolute difference, and their relative difference (i.e. the difference as a proportion of the larger ratio).</p>
     """
 
-    # Add tables for token comparison and raw value comparison
     html += generate_html_table(token_section, "token_comparison")
     html += generate_html_table(raw_section, "raw_value_comparison")
-
     html += "\n</body>\n</html>"
 
     with open(output_html, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"Report generated: {output_html}")
+    print(f"✅ Report generated: {output_html}")
 
+# ========================
+# Main Function (argparse)
+# ========================
+def main(args=None):
+    parser = argparse.ArgumentParser(description="Generate an HTML report from comparison summary JSON.")
+    parser.add_argument("--input_json", help="Input comparison JSON file", default="comparison_summary.json")
+    parser.add_argument("--output_html", help="Output HTML report path", default="report.html")
+    parsed = parser.parse_args(args)
 
-def main():
-    # Adjust the JSON filename if needed.
-    json_file = "comparison_summary.json"
-    generate_report(json_file, output_html="report.html")
-
+    generate_report(parsed.input_json, parsed.output_html)
 
 if __name__ == "__main__":
     main()
