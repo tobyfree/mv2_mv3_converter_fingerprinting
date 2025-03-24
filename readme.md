@@ -1,4 +1,6 @@
-# Manifest Analysis Pipeline
+# MV2 to MV3 comparison and pattern recognition
+
+This work is the result and supplementary source code for the owners master's thesis.
 
 A modular, scriptable pipeline to analyze browser extension manifests. It identifies structural changes between versions (V2 ↔ V3), extracts recurring patterns, compares malicious vs general traits, and scores extensions based on pattern weightings.
 
