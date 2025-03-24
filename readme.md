@@ -9,6 +9,15 @@ A modular, scriptable pipeline to analyze browser extension manifests converter 
 
 It identifies structural changes between versions (V2 ↔ V3), extracts recurring patterns, compares malicious vs general traits, and scores extensions based on pattern weightings.
 
+---
+
+## Prerequisites
+
+The extensions in the datasets need to be extracted and in folder structure, ideally named uniquely. We recommend using the extension-id.
+
+All extensions have to be sorted by manifest.json version. Into V2 and V3 folders. All V2 extensions have to be present in a V3 variant in a subfolder called "converted" as can be seen by the [link](##Folder Structure).
+
+---
 
 ## Quickstart
 
@@ -19,15 +28,6 @@ pip install -r requirements.txt
 cp config.yaml config.local.yaml  # optional, if using a template
 python run_pipeline.py --config config.yaml
 ```
-
-
----
-
-## Prerequisites
-
-The extensions in the datasets need to be extracted and in folder structure, ideally named uniquely. We recommend using the extension-id.
-
-All extensions have to be sorted by manifest.json version. Into V2 and V3 folders. All V2 extensions have to be present in a V3 variant in a subfolder called "converted" as can be seen by the folder structure.
 
 ---
 
@@ -43,7 +43,7 @@ All extensions have to be sorted by manifest.json version. Into V2 and V3 folder
 
 ---
 
-## Project Structure
+## Folder Structure
 
 ```text
 manifest-pipeline/
@@ -54,7 +54,7 @@ manifest-pipeline/
 │   │   └── V3/               # Original V3 to be scored and used for MV3 only analysis
 │   └── malicious-dataset/
 │       ├── V2/               # Original V2 used as "malicious" baseline
-│       │    └── converted/    # Converted from V2 to V3 by EMC
+│       │    └── converted/   # Converted from V2 to V3 by EMC
 │       └── V3/               # Original V3 to be used for MV3 only analysis
 ├── results/                  # All outputs (CSV, JSON, HTML)
 ├── config.yaml               # All pipeline settings
