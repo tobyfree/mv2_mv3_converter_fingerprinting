@@ -18,6 +18,7 @@ def load_config(path="config_mv3.yaml"):
 
 def main():
     config = load_config()
+    validate_config(config, pipeline="mv3")
 
     v3_general = config["paths"]["v3_general"]
     v3_malicious = config["paths"]["v3_malicious"]
@@ -76,6 +77,29 @@ def main():
     )
 
     print("\n🎉 MV3-only pipeline completed successfully.")
+
+def validate_config(config, pipeline="mv3"):
+    required = {
+        "paths": ["v3_general", "v3_malicious", "v3_dir_to_score"] if pipeline == "mv3" else ["v2_general", "v2_malicious", "v3_dir_to_score"],
+        "outputs": [
+            "summary_general", "summary_malicious",
+            "comparison_json", "score_output_csv", "html_report"
+        ],
+        "flags": ["parallel_score"],
+        "parameters": ["ratio_threshold"]
+    }
+
+    for section, keys in required.items():
+        if section not in config:
+            raise ValueError(f"Missing section in config: {section}")
+        for key in keys:
+            if key not in config[section]:
+                raise ValueError(f"Missing key in config: {section}.{key}")
+
+    if not isinstance(config["flags"]["parallel_score"], bool):
+        raise TypeError("flags.parallel_score must be a boolean")
+    if not isinstance(config["parameters"]["ratio_threshold"], float) and not isinstance(config["parameters"]["ratio_threshold"], int):
+        raise TypeError("parameters.ratio_threshold must be a float or int")
 
 if __name__ == "__main__":
     main()

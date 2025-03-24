@@ -130,7 +130,28 @@ python run_pipeline_mv3_only.py
 ```
 Edit `config_mv3.yaml` to update input/output paths and thresholds.
 
+###  MV3 Config Structure (`config_mv3.yaml`)
 
+```yaml
+paths:
+  v3_general: "data/large-dataset/V3"
+  v3_malicious: "data/malicious-dataset/V3"
+  v3_dir_to_score: "data/large-dataset/V3"
+
+outputs:
+  summary_general: "results/general_summary_mv3.json"
+  summary_malicious: "results/malicious_summary_mv3.json"
+  comparison_json: "results/comparison_summary_mv3.json"
+  score_output_csv: "results/maliciousness_scores_mv3.csv"
+  html_report: "results/report_mv3.html"
+
+flags:
+  parallel_score: false
+
+parameters:
+  ratio_threshold: 0.02
+```
+  
 ## Requirements
 
 Install the following packages:
