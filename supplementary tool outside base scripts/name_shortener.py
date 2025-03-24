@@ -15,5 +15,5 @@ def shorten_directory_names(base_path):
                 print(f'Skipped (name conflict): {entry.name}')
 
 # Example usage
-directory_to_crawl = "D:\\extensions\\malicious\\Kapravelos\\V2"
+directory_to_crawl = "D:\\extensions\\malicious\\Kapravelos\\V3"
 shorten_directory_names(directory_to_crawl)

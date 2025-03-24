@@ -131,7 +131,7 @@ def main(args=None):
 
     # Use CLI args if provided, otherwise fallback to config
     comparison_json = parsed.comparison_json or config.get("outputs", {}).get("comparison_json")
-    extensions_folder = parsed.extensions_folder or config.get("paths", {}).get("v3_dir")
+    extensions_folder = parsed.extensions_folder or config.get("paths", {}).get("v3_dir_to_score")
     output_csv = parsed.output_csv or config.get("outputs", {}).get("score_output_csv")
 
     # Final validation

@@ -51,10 +51,11 @@ manifest-pipeline/
 │   ├── large-dataset/
 │   │   ├── V2/               # Original V2 used as "benign" baseline
 │   │   │   └── converted/    # Converted from V2 to V3 by EMC
-│   │   └── V3/               # Original V3 to be scored
+│   │   └── V3/               # Original V3 to be scored and used for MV3 only analysis
 │   └── malicious-dataset/
-│       └── V2/               # Original V2 used as "malicious" baseline
-│           └── converted/    # Converted from V2 to V3 by EMC
+│       ├── V2/               # Original V2 used as "malicious" baseline
+│       │    └── converted/    # Converted from V2 to V3 by EMC
+│       └── V3/               # Original V3 to be used for MV3 only analysis
 ├── results/                  # All outputs (CSV, JSON, HTML)
 ├── config.yaml               # All pipeline settings
 ├── run_pipeline.py           # Master controller script
@@ -109,6 +110,26 @@ This will:
 Each step prints real-time progress and handles dependencies automatically.
 
 ---
+
+---
+
+## Alternative Pipeline: MV3-Only Comparison
+
+This variation of the pipeline skips Manifest V2 entirely and analyzes the structure of MV3 extensions only.
+
+### Goal
+
+- Compare general vs malicious MV3 manifests directly
+- Extract discriminative patterns
+- Score unknown MV3 extensions for malicious confidence
+
+### Running the MV3-Only Pipeline
+
+```bash
+python run_pipeline_mv3_only.py
+```
+Edit `config_mv3.yaml` to update input/output paths and thresholds.
+
 
 ## Requirements
 

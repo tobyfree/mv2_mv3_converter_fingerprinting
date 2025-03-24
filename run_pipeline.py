@@ -39,26 +39,34 @@ def main():
 
     # Step 1a: Compare Manifests (General)
     run_script(
-        f"python change_extraction.py --input_dir \"{v2_general}\" --output_csv \"{diff_csv_general}\"",
+        f"python change_extraction.py "
+        f"--input_dir \"{v2_general}\" "
+        f"--output_csv \"{diff_csv_general}\"",
         "Step 1a: Compare Manifests (General)"
     )
 
     # Step 1b: Compare Manifests (Malicious)
     run_script(
-        f"python change_extraction.py --input_dir \"{v2_malicious}\" --output_csv \"{diff_csv_malicious}\"",
+        f"python change_extraction.py "
+        f"--input_dir \"{v2_malicious}\" "
+        f"--output_csv \"{diff_csv_malicious}\"",
         "Step 1b: Compare Manifests (Malicious)"
     )
 
     # Step 2a: Extract Patterns (General)
     run_script(
-        f"python pattern_extraction.py --csv_file \"{diff_csv_general}\" --output_json \"{summary_general}\"",
+        f"python pattern_extraction.py "
+        f"--csv_file \"{diff_csv_general}\" "
+        f"--output_json \"{summary_general}\"",
         "Step 2a: Extract Patterns (General)"
     )
 
     # Step 2b: Extract Patterns (Malicious)
     if os.path.exists(diff_csv_malicious):
         run_script(
-            f"python pattern_extraction.py --csv_file \"{diff_csv_malicious}\" --output_json \"{summary_malicious}\"",
+            f"python pattern_extraction.py "
+            f"--csv_file \"{diff_csv_malicious}\" "
+            f"--output_json \"{summary_malicious}\"",
             "Step 2b: Extract Patterns (Malicious)"
         )
     else:
@@ -67,21 +75,27 @@ def main():
 
     # Step 3: Compare Pattern Summaries
     run_script(
-        f"python pattern_comparison.py --general_json \"{summary_general}\" --malicious_json \"{summary_malicious}\" "
+        f"python pattern_comparison.py "
+        f"--general_json \"{summary_general}\" "
+        f"--malicious_json \"{summary_malicious}\" "
         f"--output \"{comparison_json}\"",
         "Step 3: Compare Pattern Summaries"
     )
 
     # Step 4: Score V3 Extensions
     run_script(
-        f"python pattern_applyer.py --comparison_json \"{comparison_json}\" "
-        f"--extensions_folder \"{v3_dir}\" --output_csv \"{score_output_csv}\"",
+        f"python pattern_applyer.py "
+        f"--comparison_json \"{comparison_json}\" "
+        f"--extensions_folder \"{v3_dir}\" "
+        f"--output_csv \"{score_output_csv}\"",
         "Step 4: Score Extensions (Parallel)" if parallel_score else "Step 4: Score Extensions"
     )
 
     # Step 5: Generate HTML Report
     run_script(
-        f"python pattern_visualisation.py --input_json \"{comparison_json}\" --output_html \"{html_report}\"",
+        f"python pattern_visualisation.py "
+        f"--input_json \"{comparison_json}\" "
+        f"--output_html \"{html_report}\"",
         "Step 5: Generate HTML Report"
     )
 

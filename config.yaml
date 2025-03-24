@@ -1,7 +1,7 @@
 paths:
   v2_general: "D:/extensions/large-dataset/V2"
   v2_malicious: "D:/extensions/malicious/Kapravelos/V2"
-  v3_dir: "D:/extensions/large-dataset/V3"
+  v3_dir_to_score: "D:/extensions/large-dataset/V3"
 
 outputs:
   diff_csv_general: "results/manifest_differences_general.csv"

@@ -1,0 +1,17 @@
+paths:
+  v3_general: "D:/extensions/large-dataset/V3"
+  v3_malicious: "D:/extensions/malicious/Kapravelos/V3"
+  v3_dir_to_score: "D:/extensions/large-dataset/V3"
+
+outputs:
+  summary_general: "results/general_summary_mv3.json"
+  summary_malicious: "results/malicious_summary_mv3.json"
+  comparison_json: "results/comparison_summary_mv3.json"
+  score_output_csv: "results/maliciousness_scores_mv3.csv"
+  html_report: "results/report_mv3.html"
+
+flags:
+  parallel_score: false
+
+parameters:
+  ratio_threshold: 0.02
