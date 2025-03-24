@@ -1,3 +1,6 @@
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
 # MV2 to MV3 comparison and pattern recognition
 
 This work is the result and supplementary source code for the owners master's thesis.
@@ -24,6 +27,7 @@ All extensions have to be sorted by manifest.json version. Into V2 and V3 folder
 - Generate an HTML report of the found patterns
 - Score unseen V3 extensions based on risky patterns
 - Supports multiprocessing and YAML-based config
+- Each script is executable individually if the whole pipeline is not necessary
 
 ---
 
@@ -102,6 +106,11 @@ Install the following packages:
 - pyyaml
 - tqdm
 
+Recommended:
+
+```bash
+pip install -r requirements.txt
+```
 
 ---
 ## Supplementary code

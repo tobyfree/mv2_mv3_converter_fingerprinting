@@ -3,6 +3,9 @@ import os
 import json
 import csv
 import re
+from pathlib import Path
+
+import yaml
 from tqdm import tqdm
 import argparse
 from collections import Counter
@@ -107,19 +110,42 @@ def process_extensions_folder(extensions_folder, pattern_weights, output_csv):
 # ========================
 # Main with argparse
 # ========================
+
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Score extensions for malicious confidence.")
-    parser.add_argument("--comparison_json", help="Path to comparison summary JSON", default="comparison_summary.json")
-    parser.add_argument("--extensions_folder", help="Path to folder of extension subfolders", default="D:\\extensions\\large-dataset\\V3")
-    parser.add_argument("--output_csv", help="Output CSV path", default="maliciousness_scores_large_V3.csv")
+    parser.add_argument("--comparison_json", help="Path to comparison summary JSON")
+    parser.add_argument("--extensions_folder", help="Path to folder of extension subfolders")
+    parser.add_argument("--output_csv", help="Output CSV path")
+    parser.add_argument("--config", help="Optional path to config.yaml")
     parsed = parser.parse_args(args)
 
-    pattern_weights = load_pattern_scores(parsed.comparison_json)
+    # Load config if provided
+    config = {}
+    if parsed.config:
+        config_path = Path(parsed.config)
+        if not config_path.exists():
+            parser.error(f"Config file not found: {parsed.config}")
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+
+    # Use CLI args if provided, otherwise fallback to config
+    comparison_json = parsed.comparison_json or config.get("outputs", {}).get("comparison_json")
+    extensions_folder = parsed.extensions_folder or config.get("paths", {}).get("v3_dir")
+    output_csv = parsed.output_csv or config.get("outputs", {}).get("score_output_csv")
+
+    # Final validation
+    if not comparison_json or not extensions_folder or not output_csv:
+        parser.error("You must provide --comparison_json, --extensions_folder, and --output_csv (or use --config with those set)")
+
+    # Run pipeline logic
+    pattern_weights = load_pattern_scores(comparison_json)
     if not pattern_weights:
         print("❌ No pattern weights loaded. Check the comparison JSON file.")
         return
 
-    process_extensions_folder(parsed.extensions_folder, pattern_weights, parsed.output_csv)
+    process_extensions_folder(extensions_folder, pattern_weights, output_csv)
+
 
 if __name__ == "__main__":
     main()

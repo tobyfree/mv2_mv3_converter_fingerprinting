@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import json
 import argparse
+from pathlib import Path
+
+import yaml
 from tqdm import tqdm
 
 # ========================
@@ -83,11 +86,31 @@ def generate_report(json_file, output_html="report.html"):
 # ========================
 def main(args=None):
     parser = argparse.ArgumentParser(description="Generate an HTML report from comparison summary JSON.")
-    parser.add_argument("--input_json", help="Input comparison JSON file", default="comparison_summary.json")
-    parser.add_argument("--output_html", help="Output HTML report path", default="report.html")
+    parser.add_argument("--input_json", help="Input comparison JSON file")
+    parser.add_argument("--output_html", help="Output HTML report path")
+    parser.add_argument("--config", help="Optional path to config.yaml")
+
     parsed = parser.parse_args(args)
 
-    generate_report(parsed.input_json, parsed.output_html)
+    # Load config if provided
+    config = {}
+    if parsed.config:
+        config_path = Path(parsed.config)
+        if not config_path.exists():
+            parser.error(f"Config file not found: {parsed.config}")
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+
+    # Resolve inputs: CLI args > config values
+    input_json = parsed.input_json or config.get("outputs", {}).get("comparison_json")
+    output_html = parsed.output_html or config.get("outputs", {}).get("html_report")
+
+    # Final check
+    if not input_json or not output_html:
+        parser.error("You must provide --input_json and --output_html, or use --config with those set.")
+
+    # Run report generation
+    generate_report(input_json, output_html)
 
 if __name__ == "__main__":
     main()

@@ -3,8 +3,10 @@ import os
 import json
 import csv
 import argparse
+from pathlib import Path
+
+import yaml
 from tqdm import tqdm
-from collections import defaultdict
 
 # ========================
 # Flatten Manifest Helpers
@@ -124,17 +126,39 @@ def save_to_csv(results, output_csv):
 # ========================
 # Main (argparse enabled)
 # ========================
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Compare V2 and V3 manifest files across extensions.")
-    parser.add_argument("--input_dir", help="Path to the parent directory containing extensions", default="D:\\extensions\\large-dataset\\V2")
-    parser.add_argument("--output_csv", help="Path to output CSV file", default="manifest_differences_general.csv")
+    parser.add_argument("--input_dir", help="Path to the parent directory containing extensions")
+    parser.add_argument("--output_csv", help="Path to output CSV file")
+    parser.add_argument("--config", help="Optional path to config.yaml")
+
     parsed = parser.parse_args(args)
 
-    results = process_extensions(parsed.input_dir)
+    # Load config if provided
+    config = {}
+    if parsed.config:
+        config_path = Path(parsed.config)
+        if not config_path.exists():
+            parser.error(f"Config file not found: {parsed.config}")
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+
+    # Resolve inputs: CLI args > config values
+    input_dir = parsed.input_dir or config.get("paths", {}).get("v2_general")
+    output_csv = parsed.output_csv or config.get("outputs", {}).get("diff_csv_general")
+
+    # Final check
+    if not input_dir or not output_csv:
+        parser.error("You must provide --input_dir and --output_csv, or use --config with those set.")
+
+    # Run core logic
+    results = process_extensions(input_dir)
     if results:
-        save_to_csv(results, parsed.output_csv)
+        save_to_csv(results, output_csv)
     else:
         print("No valid extensions found or no differences detected.")
+
 
 if __name__ == "__main__":
     main()

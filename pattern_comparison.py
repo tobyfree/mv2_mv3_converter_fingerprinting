@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import json
 import argparse
+from pathlib import Path
+
+import yaml
 from tqdm import tqdm
 
 # ========================
@@ -41,15 +44,36 @@ def compare_patterns(general_summary, malicious_summary, field="token_counts"):
 # ========================
 # Main Function
 # ========================
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Compare general vs. malicious pattern summaries.")
-    parser.add_argument("--general_json", help="Path to general summary JSON", default="general_summary.json")
-    parser.add_argument("--malicious_json", help="Path to malicious summary JSON", default="malicious_summary.json")
-    parser.add_argument("--output", help="Path to output comparison JSON", default="comparison_summary.json")
+    parser.add_argument("--general_json", help="Path to general summary JSON")
+    parser.add_argument("--malicious_json", help="Path to malicious summary JSON")
+    parser.add_argument("--output", help="Path to output comparison JSON")
+    parser.add_argument("--config", help="Optional path to config.yaml")
     parsed = parser.parse_args(args)
 
-    general_summary = load_summary(parsed.general_json)
-    malicious_summary = load_summary(parsed.malicious_json)
+    # Load config if provided
+    config = {}
+    if parsed.config:
+        config_path = Path(parsed.config)
+        if not config_path.exists():
+            parser.error(f"Config file not found: {parsed.config}")
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+
+    # Use CLI args if provided, otherwise fallback to config
+    general_json = parsed.general_json or config.get("outputs", {}).get("summary_general")
+    malicious_json = parsed.malicious_json or config.get("outputs", {}).get("summary_malicious")
+    output_json = parsed.output or config.get("outputs", {}).get("comparison_json")
+
+    # Final validation
+    if not general_json or not malicious_json or not output_json:
+        parser.error("You must provide --general_json, --malicious_json, and --output (or use --config with those set)")
+
+    # Main logic
+    general_summary = load_summary(general_json)
+    malicious_summary = load_summary(malicious_json)
 
     diff_tokens = compare_patterns(general_summary, malicious_summary, field="token_counts")
     diff_raw = compare_patterns(general_summary, malicious_summary, field="raw_values")
@@ -59,9 +83,9 @@ def main(args=None):
         "raw_value_comparison": diff_raw
     }
 
-    with open(parsed.output, "w", encoding="utf-8") as f:
+    with open(output_json, "w", encoding="utf-8") as f:
         json.dump(combined_diff, f, indent=4)
-    print(f"✅ Comparison summary written to {parsed.output}")
+    print(f"✅ Comparison summary written to {output_json}")
 
 if __name__ == "__main__":
     main()
