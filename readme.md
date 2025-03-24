@@ -15,7 +15,7 @@ It identifies structural changes between versions (V2 ↔ V3), extracts recurrin
 
 The extensions in the datasets need to be extracted and in folder structure, ideally named uniquely. We recommend using the extension-id.
 
-All extensions have to be sorted by manifest.json version. Into V2 and V3 folders. All V2 extensions have to be present in a V3 variant in a subfolder called "converted" as can be seen by the [link](##Folder Structure).
+All extensions have to be sorted by manifest.json version. Into V2 and V3 folders. All V2 extensions have to be present in a V3 variant in a subfolder called "converted" as can be seen by the Folder Structure.
 
 ---
 
@@ -96,7 +96,7 @@ flags:
 ## Running the Pipeline
 
 ```bash
-python run_pipeline.py
+python run_pipeline.py --config config.yaml
 ```
 
 This will:
@@ -108,8 +108,6 @@ This will:
 5. Score all V3 extensions
 
 Each step prints real-time progress and handles dependencies automatically.
-
----
 
 ---
 
@@ -126,7 +124,7 @@ This variation of the pipeline skips Manifest V2 entirely and analyzes the struc
 ### Running the MV3-Only Pipeline
 
 ```bash
-python run_pipeline_mv3_only.py
+python run_pipeline_mv3_only.py --config config_mv3.yaml
 ```
 Edit `config_mv3.yaml` to update input/output paths and thresholds.
 

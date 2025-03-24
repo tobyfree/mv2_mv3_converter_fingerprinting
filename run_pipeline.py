@@ -25,7 +25,7 @@ def main():
 
     v2_general = config["paths"]["v2_general"]
     v2_malicious = config["paths"]["v2_malicious"]
-    v3_dir = config["paths"]["v3_dir"]
+    v3_dir_to_score = config["paths"]["v3_dir_to_score"]
 
     diff_csv_general = config["outputs"]["diff_csv_general"]
     diff_csv_malicious = config["outputs"]["diff_csv_malicious"]
@@ -86,7 +86,7 @@ def main():
     run_script(
         f"python pattern_applyer.py "
         f"--comparison_json \"{comparison_json}\" "
-        f"--extensions_folder \"{v3_dir}\" "
+        f"--extensions_folder \"{v3_dir_to_score}\" "
         f"--output_csv \"{score_output_csv}\"",
         "Step 4: Score Extensions (Parallel)" if parallel_score else "Step 4: Score Extensions"
     )
@@ -103,7 +103,7 @@ def main():
 
 def validate_config(cfg):
     required = {
-        "paths": ["v2_general", "v2_malicious", "v3_dir"],
+        "paths": ["v2_general", "v2_malicious", "v3_dir_to_score"],
         "outputs": [
             "diff_csv_general", "diff_csv_malicious",
             "summary_general", "summary_malicious",
