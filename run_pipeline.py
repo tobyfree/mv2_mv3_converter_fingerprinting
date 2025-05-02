@@ -36,6 +36,7 @@ def main():
     html_report = config["outputs"]["html_report"]
 
     parallel_score = config.get("flags", {}).get("parallel_score", False)
+    ratio_threshold = config.get("parameters", {}).get("ratio_threshold")
 
     # Step 1a: Compare Manifests (General)
     run_script(
@@ -57,7 +58,8 @@ def main():
     run_script(
         f"python pattern_extraction.py "
         f"--csv_file \"{diff_csv_general}\" "
-        f"--output_json \"{summary_general}\"",
+        f"--output_json \"{summary_general}\" "
+        f"--ratio_threshold {ratio_threshold}",
         "Step 2a: Extract Patterns (General)"
     )
 
@@ -66,7 +68,8 @@ def main():
         run_script(
             f"python pattern_extraction.py "
             f"--csv_file \"{diff_csv_malicious}\" "
-            f"--output_json \"{summary_malicious}\"",
+            f"--output_json \"{summary_malicious}\" "
+            f"--ratio_threshold {ratio_threshold}",
             "Step 2b: Extract Patterns (Malicious)"
         )
     else:

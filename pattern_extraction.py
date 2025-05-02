@@ -35,7 +35,7 @@ def extract_text_patterns(
     csv_file,
     columns_to_parse,
     output_json="summary.json",
-    ratio_threshold=0.01
+    ratio_threshold=.9
 ):
     df = pd.read_csv(csv_file, header=0, sep=",", dtype=str).fillna("")
     total_extensions = len(df)
@@ -105,7 +105,7 @@ def main(args=None):
     parser = argparse.ArgumentParser(description="Extract text patterns from manifest diff CSV.")
     parser.add_argument("--csv_file", help="Path to the input CSV file", default=None)
     parser.add_argument("--output_json", help="Path to the output JSON file", default=None)
-    parser.add_argument("--ratio_threshold", type=float, help="Minimum pattern frequency ratio", default=0.02)
+    parser.add_argument("--ratio_threshold", type=float, help="Minimum pattern frequency ratio", default=0.9)
     parser.add_argument("--columns", nargs='+', help="List of columns to analyze",
                         default=["added_details", "removed_details", "modified_details_v2", "modified_details_v3"])
 

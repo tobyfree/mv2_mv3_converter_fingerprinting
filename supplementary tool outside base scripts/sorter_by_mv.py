@@ -4,7 +4,7 @@ import shutil
 import multiprocessing
 
 # Directory containing the extensions
-directory = "D:\\extensions\\combined"
+directory = "D:\\extensions\\malicious\\combined"
 
 # Output folders
 v2_folder = os.path.join(directory, "V2")
