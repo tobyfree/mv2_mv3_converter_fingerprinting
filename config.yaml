@@ -1,6 +1,6 @@
 paths:
   v2_general: "D:/extensions/large-dataset/V2"
-  v2_malicious: "D:/extensions/malicious/Kapravelos/V2"
+  v2_malicious: "D:/extensions/malicious/combined/V2"
   v3_dir_to_score: "D:/extensions/large-dataset/V3"
 
 outputs:
@@ -9,11 +9,11 @@ outputs:
   summary_general: "results/general_summary.json"
   summary_malicious: "results/malicious_summary.json"
   comparison_json: "results/comparison_summary.json"
-  score_output_csv: "results/maliciousness_scores_large_V3.csv"
+  score_output_csv: "results/maliciousness_scores_large_V3_2.csv"
   html_report: "results/report.html"
 
 flags:
   parallel_score: true
 
 parameters:
-  ratio_threshold: 0.02
+  ratio_threshold: 0.05
